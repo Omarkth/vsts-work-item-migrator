@@ -26,7 +26,7 @@ namespace Common.Validation
         public async Task Validate(IValidationContext validationContext)
         {
             this.ValidationContext = validationContext;
-           
+
             if (!validationContext.Config.SkipExisting)
             {
                 var stopwatch = Stopwatch.StartNew();
@@ -235,8 +235,12 @@ namespace Common.Validation
             var targetAttributes = hyperlinkToSourceRelation.Attributes;
             targetAttributes.TryGetValue(Constants.RelationAttributeComment, out string targetRelationPhaseStatus);
 
-            string revNumberString = targetRelationPhaseStatus.SplitBySemicolonToHashSet().First();
-            return Convert.ToInt32(revNumberString);
+            var parts = targetRelationPhaseStatus.SplitBySemicolonToHashSet();
+            if (!int.TryParse(parts.First(), out int rev))
+            {
+                rev = int.Parse(parts.Skip(1).First());
+            }
+            return rev;
         }
     }
 }

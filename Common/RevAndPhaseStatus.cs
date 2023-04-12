@@ -5,6 +5,8 @@ namespace Common
 {
     public class RevAndPhaseStatus
     {
+        public const string IGNORED_COMMENT = "IGNORE";
+
         public int Rev { get; set; }
 
         public ISet<string> PhaseStatus { get; set; }
@@ -22,14 +24,20 @@ namespace Common
         public void SetRevAndPhaseStatus(string revAndPhaseStatusComment)
         {
             string[] parts = revAndPhaseStatusComment.Split(';');
-            this.Rev = int.Parse(parts[0]);
-            string[] phaseStatusStringParts = parts.SubArray(1, parts.Length - 1);
+            int revIndex = 0;
+            if (!int.TryParse(parts[revIndex], out int rev))
+            {
+                revIndex++;
+                rev = int.Parse(parts[revIndex]);
+            }
+            this.Rev = rev;
+            string[] phaseStatusStringParts = parts.SubArray(revIndex + 1, parts.Length - revIndex - 1);
             this.PhaseStatus = phaseStatusStringParts.ToHashSet();
         }
 
         public string GetCommentRepresentation()
         {
-            return $"{this.Rev};{string.Join(";", this.PhaseStatus)}";
+            return $"{IGNORED_COMMENT};{this.Rev};{string.Join(";", this.PhaseStatus)}";
         }
     }
 }
