@@ -24,7 +24,7 @@ namespace Common
             string[] parts = revAndPhaseStatusComment.Split(';');
             this.Rev = int.Parse(parts[0]);
             string[] phaseStatusStringParts = parts.SubArray(1, parts.Length - 1);
-            this.PhaseStatus = phaseStatusStringParts.ToHashSet();
+            this.PhaseStatus = EnumerableExtensions.ToHashSet(phaseStatusStringParts);
         }
 
         public string GetCommentRepresentation()

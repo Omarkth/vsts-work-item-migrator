@@ -8,7 +8,7 @@ namespace Common
         public static ISet<string> SplitBySemicolonToHashSet(this string input)
         {
             string[] parts = input.Split(';');
-            return parts.ToHashSet();
+            return EnumerableExtensions.ToHashSet(parts);
         }
     }
 }
