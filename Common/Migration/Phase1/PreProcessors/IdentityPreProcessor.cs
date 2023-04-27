@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common.Config;
 using Logging;
+using Microsoft.Azure.DevOps.Licensing.WebApi;
 using Microsoft.Extensions.Logging;
 using Microsoft.TeamFoundation.Framework.Common;
 using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.Graph.Client;
 using Microsoft.VisualStudio.Services.Identity;
 using Microsoft.VisualStudio.Services.Identity.Client;
-using Microsoft.VisualStudio.Services.Licensing.Client;
+using Microsoft.VisualStudio.Services.Licensing;
+using Microsoft.VisualStudio.Services.MemberEntitlementManagement.WebApi;
 using static Microsoft.VisualStudio.Services.Graph.Constants;
 
 namespace Common.Migration
@@ -22,7 +24,7 @@ namespace Common.Migration
 
         private IMigrationContext context;
         private GraphHttpClient graphClient;
-        private LicensingHttpClient licensingHttpClient;
+        private MemberEntitlementManagementHttpClient entitlementHttpClient;
         private IdentityHttpClient identityHttpClient;
 
         public string Name => "Identity";
@@ -35,8 +37,9 @@ namespace Common.Migration
         public async Task Prepare(IMigrationContext context)
         {
             this.context = context;
+
             this.graphClient = context.TargetClient.Connection.GetClient<GraphHttpClient>();
-            this.licensingHttpClient = context.TargetClient.Connection.GetClient<LicensingHttpClient>();
+            this.entitlementHttpClient = context.TargetClient.Connection.GetClient<MemberEntitlementManagementHttpClient>();
             this.identityHttpClient = context.TargetClient.Connection.GetClient<IdentityHttpClient>();
         }
 
@@ -63,8 +66,20 @@ namespace Common.Migration
                                 && !this.context.ValidatedIdentities.Contains(identityValue)
                                 && !this.context.InvalidIdentities.Contains(identityValue))
                             {
-                                Logger.LogTrace(LogDestination.File, $"Found identity {identityValue} in batch {batchContext.BatchId} which has not yet been validated for the target account");
-                                identitiesToProcess.Add(identityValue);
+                                var identities = await RetryHelper.RetryAsync(async () =>
+                                {
+                                    return await identityHttpClient.ReadIdentitiesAsync(IdentitySearchFilter.MailAddress, identityValue);
+                                }, 5);
+
+                                if (identities.Count > 0)
+                                {
+                                    context.ValidatedIdentities.Add(identityValue);
+                                }
+                                else
+                                {
+                                    Logger.LogTrace(LogDestination.File, $"Found identity {identityValue} in batch {batchContext.BatchId} which has not yet been validated for the target account");
+                                    identitiesToProcess.Add(identityValue);
+                                }
                             }
                         }
                     }
@@ -97,10 +112,17 @@ namespace Common.Migration
                     }
                     else
                     {
-                        var assignResult = await RetryHelper.RetryAsync(async () =>
+                        var userEntitlement = new UserEntitlement
                         {
-                            return await licensingHttpClient.AssignAvailableEntitlementAsync(identities[0].Id, dontNotifyUser: true);
-                        }, 5);
+                            User = createUserResult,
+                            AccessLevel = new AccessLevel
+                            {
+                                AccountLicenseType = AccountLicenseType.Express
+                            }
+                        };
+
+                        var document = new SingleJsonDocumentBuilder().AddUserEntitlement(userEntitlement).Build();
+                        var assignResult = await entitlementHttpClient.UpdateUserEntitlementsAsync(document, doNotSendInviteForNewUsers: true);
                         context.ValidatedIdentities.Add(identity);
                     }
                 }

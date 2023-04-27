@@ -33,7 +33,7 @@ namespace Common
             catch (Exception e)
             {
                 Logger.LogError(LogDestination.File, e, $"Unable to create the WorkItemTrackingHttpClient for {Url}");
-                throw e;
+                throw;
             }
         }
     }
