@@ -12,7 +12,7 @@ namespace Common.Migration
         //Mapping of targetId of a work item to attribute id of the hyperlink
         public ConcurrentDictionary<int, Int64> TargetIdToSourceHyperlinkAttributeId { get; set; } = new ConcurrentDictionary<int, Int64>();
 
-        public ConcurrentSet<string> ValidatedWorkItemLinkRelationTypes { get; set; } 
+        public ConcurrentSet<string> ValidatedWorkItemLinkRelationTypes { get; set; }
 
         public ConcurrentDictionary<string, ISet<string>> WorkItemTypes { get; set; }
 
@@ -26,7 +26,8 @@ namespace Common.Migration
 
         public ISet<string> TargetIterationPaths { get; set; }
 
-        public ISet<string> IdentityFields { get; set; }
+        public ISet<string> SourceIdentityFields { get; set; }
+        public ISet<string> TargetIdentityFields { get; set; }
 
         public ConcurrentSet<string> ValidatedIdentities { get; set; } = new ConcurrentSet<string>(StringComparer.OrdinalIgnoreCase);
 
