@@ -28,7 +28,8 @@ namespace Common.Migration
 
         ISet<string> TargetIterationPaths { get; set; }
 
-        ISet<string> IdentityFields { get; set; }
+        ISet<string> SourceIdentityFields { get; set; }
+        ISet<string> TargetIdentityFields { get; set; }
 
         ConcurrentSet<string> ValidatedIdentities { get; set; }
         ConcurrentSet<string> InvalidIdentities { get; set; }

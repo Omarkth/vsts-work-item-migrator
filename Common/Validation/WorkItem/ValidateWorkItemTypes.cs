@@ -29,6 +29,7 @@ namespace Common.Validation
                 // We need all fields to validate the field types
                 var sourceFields = (await WorkItemTrackingHelpers.GetFields(context.SourceClient.WorkItemTrackingHttpClient)).ToDictionary(key => key.ReferenceName);
                 context.SourceFields = new ConcurrentDictionary<string, WorkItemField>(sourceFields, StringComparer.OrdinalIgnoreCase);
+                context.SourceIdentityFields = new HashSet<string>(sourceFields.Where(f => f.Value.IsIdentity).Select(f => f.Key), StringComparer.OrdinalIgnoreCase);
             }
             catch (Exception e)
             {
@@ -40,7 +41,7 @@ namespace Common.Validation
                 // We need all fields to validate the field types
                 var targetFields = (await WorkItemTrackingHelpers.GetFields(context.TargetClient.WorkItemTrackingHttpClient)).ToDictionary(key => key.ReferenceName);
                 context.TargetFields = new ConcurrentDictionary<string, WorkItemField>(targetFields, StringComparer.OrdinalIgnoreCase);
-                context.IdentityFields = new HashSet<string>(targetFields.Where(f => f.Value.IsIdentity).Select(f => f.Key), StringComparer.OrdinalIgnoreCase);
+                context.TargetIdentityFields = new HashSet<string>(targetFields.Where(f => f.Value.IsIdentity).Select(f => f.Key), StringComparer.OrdinalIgnoreCase);
             }
             catch (Exception e)
             {

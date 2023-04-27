@@ -30,7 +30,8 @@ namespace Common.Validation
 
         ConcurrentSet<string> ValidatedFields { get; }
 
-        ISet<string> IdentityFields { get; set; }
+        ISet<string> SourceIdentityFields { get; set; }
+        ISet<string> TargetIdentityFields { get; set; }
 
         ConcurrentSet<string> SkippedTypes { get; }
 
@@ -45,9 +46,9 @@ namespace Common.Validation
         ISet<string> TargetIterationPaths { get; set; }
 
         ConcurrentSet<string> ValidatedIterationPaths { get; }
-        
+
         ConcurrentSet<string> SkippedIterationPaths { get; }
-        
+
         ConcurrentSet<string> ValidatedWorkItemLinkRelationTypes { get; set; }
 
         ConcurrentSet<int> SkippedWorkItems { get; }

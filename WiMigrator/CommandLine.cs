@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Common;
 using Common.Config;
@@ -130,7 +130,8 @@ namespace WiMigrator
 
                 migrationContext.WorkItemIdsUris = validatorContext.WorkItemIdsUris;
                 migrationContext.WorkItemTypes = validatorContext.TargetTypesAndFields;
-                migrationContext.IdentityFields = validatorContext.IdentityFields;
+                migrationContext.SourceIdentityFields = validatorContext.SourceIdentityFields;
+                migrationContext.TargetIdentityFields = validatorContext.TargetIdentityFields;
                 migrationContext.TargetAreaPaths = validatorContext.TargetAreaPaths;
                 migrationContext.TargetIterationPaths = validatorContext.TargetIterationPaths;
                 migrationContext.WorkItemsMigrationState = validatorContext.WorkItemsMigrationState;

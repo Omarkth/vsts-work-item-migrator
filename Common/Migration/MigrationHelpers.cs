@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+using Microsoft.VisualStudio.Services.WebApi;
 using Microsoft.VisualStudio.Services.WebApi.Patch;
 using Microsoft.VisualStudio.Services.WebApi.Patch.Json;
 
@@ -27,6 +28,30 @@ namespace Common.Migration
             }
 
             return result;
+        }
+
+        public static bool GetIdentityUniqueName(object identityField, out string uniqueName)
+        {
+            uniqueName = null;
+            if (identityField is string fieldString)
+            {
+                uniqueName = fieldString;
+            }
+            else if (identityField is IdentityRef identity)
+            {
+                uniqueName = identity.UniqueName ?? identity.DisplayName;
+            }
+            else
+            {
+                throw new Exception($"Unexpected type [{identityField.GetType()}] for identity field: {identityField}");
+            }
+
+            if (string.IsNullOrEmpty(uniqueName))
+            {
+                throw new Exception($"Unexpected empty unique name for identity field: {identityField}");
+            }
+
+            return uniqueName != null;
         }
 
         public static ICollection<string> GetInlineImageHtmlTags(string input, string accountUrl)
@@ -158,7 +183,7 @@ namespace Common.Migration
 
             return jsonPatchOperation;
         }
-        
+
         public static JsonPatchOperation GetRelationRemoveOperation(int existingRelationIndex)
         {
             JsonPatchOperation jsonPatchOperation = new JsonPatchOperation();
@@ -181,7 +206,7 @@ namespace Common.Migration
                 return string.Empty;
             }
         }
-              
+
         public static JsonPatchOperation GetWorkItemLinkAddOperation(IMigrationContext migrationContext, WorkItemLink workItemLink)
         {
             string workItemEndpoint = ClientHelpers.GetWorkItemApiEndpoint(migrationContext.Config.TargetConnection.Account, workItemLink.Id);

@@ -45,22 +45,21 @@ namespace Common.Migration
 
         public async Task Process(IBatchMigrationContext batchContext)
         {
-            object identityObject = null;
-            string identityValue = null;
             HashSet<string> identitiesToProcess = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var sourceWorkItem in batchContext.SourceWorkItems)
             {
-                foreach (var field in context.IdentityFields)
+                foreach (var field in context.SourceIdentityFields)
                 {
-                    if (sourceWorkItem.Fields.TryGetValueIgnoringCase(field, out identityObject))
+                    if (sourceWorkItem.Fields.TryGetValueIgnoringCase(field, out var identityObject) && MigrationHelpers.GetIdentityUniqueName(identityObject, out string identityValue))
                     {
-                        identityValue = (string)identityObject;
-                        if (!string.IsNullOrEmpty(identityValue)
-                            && identityValue.Contains("<") && identityValue.Contains(">") && (identityValue.Contains("@")))
+                        if (!string.IsNullOrEmpty(identityValue) && identityValue.Contains("@"))
                         {
-                            // parse out email address from the combo string
-                            identityValue = identityValue.Substring(identityValue.LastIndexOf("<") + 1, identityValue.LastIndexOf(">") - identityValue.LastIndexOf("<") - 1);
+                            if (identityValue.Contains("<") && identityValue.Contains(">"))
+                            {
+                                // parse out email address from the combo string
+                                identityValue = identityValue.Substring(identityValue.LastIndexOf("<") + 1, identityValue.LastIndexOf(">") - identityValue.LastIndexOf("<") - 1);
+                            }
 
                             if (!identitiesToProcess.Contains(identityValue)
                                 && !this.context.ValidatedIdentities.Contains(identityValue)
@@ -86,7 +85,7 @@ namespace Common.Migration
                 }
             }
 
-            Logger.LogTrace(LogDestination.File, $"Adding {identitiesToProcess.Count} identities to the account for batch {batchContext.BatchId}");
+            Logger.LogInformation(LogDestination.File, $"Adding {identitiesToProcess.Count} identities to the account for batch {batchContext.BatchId}");
             foreach (var identity in identitiesToProcess)
             {
                 try
@@ -133,7 +132,7 @@ namespace Common.Migration
                 }
             }
 
-            Logger.LogTrace(LogDestination.File, $"Completed adding {identitiesToProcess.Count} identities to the account for batch {batchContext.BatchId}");
+            Logger.LogInformation(LogDestination.File, $"Completed adding {identitiesToProcess.Count} identities to the account for batch {batchContext.BatchId}");
         }
     }
 }

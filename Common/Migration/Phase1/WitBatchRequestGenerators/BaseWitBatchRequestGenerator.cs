@@ -108,12 +108,6 @@ namespace Common.Migration
                     KeyValuePair<string, object> fieldProcessedForConfigFields = GetTargetField(sourceWorkItemType, sourceField, fieldNamesAlreadyPopulated);
                     KeyValuePair<string, object> preparedField = UpdateProjectNameIfNeededForField(sourceWorkItem, fieldProcessedForConfigFields);
 
-                    // TEMPORARY HACK for handling emoticons in identity fields:
-                    if (this.migrationContext.Config.ClearIdentityDisplayNames)
-                    {
-                        preparedField = RemoveEmojis(sourceField, preparedField);
-                    }
-
                     // add inline image urls
                     JsonPatchOperation jsonPatchOperation;
                     if (this.migrationContext.HtmlFieldReferenceNames.Contains(preparedField.Key)
@@ -170,6 +164,20 @@ namespace Common.Migration
             string fieldName = sourceField.Key;
             object fieldValue = sourceField.Value;
 
+            if (migrationContext.SourceIdentityFields.Contains(fieldName))
+            {
+                if (MigrationHelpers.GetIdentityUniqueName(fieldValue, out var fieldValueString))
+                {
+                    fieldValue = fieldValueString;
+                }
+
+                // TEMPORARY HACK for handling emoticons in identity fields:
+                if (migrationContext.Config.ClearIdentityDisplayNames && fieldValue is string targetFieldValueString)
+                {
+                    fieldValue = Regex.Replace(targetFieldValueString, @"\u00a9|\u00ae|\ufffd|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]", "");
+                }
+            }
+
             var targetFieldMap = GetTargetFieldMap(sourceWorkItemType, fieldName);
 
             if (targetFieldMap != null)
@@ -198,26 +206,6 @@ namespace Common.Migration
             }
 
             return new KeyValuePair<string, object>(fieldName, fieldValue);
-        }
-
-        // TEMPORARY HACK for handling emoticons in identity fields:
-        protected KeyValuePair<string, object> RemoveEmojis(KeyValuePair<string, object> sourceField, KeyValuePair<string, object> targetField)
-        {
-            if (targetField.Value is string
-                && this.migrationContext.IdentityFields.Contains(targetField.Key))
-            {
-                string targetFieldValueString = targetField.Value as string;
-
-                if (!string.IsNullOrEmpty(targetFieldValueString))
-                {
-                    string fixedTargetFieldValue = Regex.Replace(targetFieldValueString, @"\u00a9|\u00ae|\ufffd|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]", "");
-
-                    KeyValuePair<string, object> targetFieldNoSanta = new KeyValuePair<string, object>(targetField.Key, fixedTargetFieldValue);
-                    targetField = targetFieldNoSanta;
-                }
-            }
-
-            return targetField;
         }
 
         /// <summary>

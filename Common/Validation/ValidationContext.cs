@@ -34,7 +34,8 @@ namespace Common.Validation
 
         public ConcurrentSet<string> ValidatedFields { get; } = new ConcurrentSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        public ISet<string> IdentityFields { get; set; }
+        public ISet<string> SourceIdentityFields { get; set; }
+        public ISet<string> TargetIdentityFields { get; set; }
 
         public ConcurrentSet<string> SkippedTypes { get; } = new ConcurrentSet<string>(StringComparer.OrdinalIgnoreCase);
 
