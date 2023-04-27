@@ -14,6 +14,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.4" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="16.205.1" />
     <PackageReference Include="Microsoft.VisualStudio.Services.Client" Version="16.205.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Services.MemberEntitlementManagement.WebApi" Version="16.205.1" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
