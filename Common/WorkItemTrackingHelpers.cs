@@ -199,6 +199,12 @@ namespace Common
             Logger.LogInformation(LogDestination.File, $"Getting work item ids for {client.BaseAddress.Host}");
 
             var queryHierarchyItem = await GetQueryAsync(client, project, queryName);
+
+            return await GetWorkItemIdAndReferenceLinksAsync(client, project, queryHierarchyItem, postMoveTag, queryPageSize);
+        }
+
+        public async static Task<IDictionary<int, string>> GetWorkItemIdAndReferenceLinksAsync(WorkItemTrackingHttpClient client, string project, QueryHierarchyItem queryHierarchyItem, string postMoveTag, int queryPageSize)
+        {
             var workItemIdsUris = new Dictionary<int, string>();
 
             var baseQuery = ParseQueryForPaging(queryHierarchyItem.Wiql, postMoveTag);
