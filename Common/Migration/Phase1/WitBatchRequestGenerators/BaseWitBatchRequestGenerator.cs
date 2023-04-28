@@ -168,6 +168,10 @@ namespace Common.Migration
             {
                 if (MigrationHelpers.GetIdentityUniqueName(fieldValue, out var fieldValueString))
                 {
+                    if (fieldValueString.Contains('<') && fieldValueString.Contains('>'))
+                    {
+                        fieldValueString = fieldValueString.Substring(fieldValueString.LastIndexOf("<") + 1, fieldValueString.LastIndexOf(">") - fieldValueString.LastIndexOf("<") - 1);
+                    }
                     fieldValue = fieldValueString;
                 }
 
